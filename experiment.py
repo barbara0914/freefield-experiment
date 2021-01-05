@@ -1,63 +1,44 @@
 import slab
 import time
-import freefield
 from freefield import main
 import numpy as np
 from pathlib import Path
-import sys
-sys.path.append("C:/Projects/soundtools")
-sys.path.append("C:/Projects/freefield_toolbox/freefield")
-sys.path.append("C:/Projects/Emotion_Loc/Experiment_2/py/")
+DIR = Path(__file__).parent.resolve()  # location of the main folder
 
-EXPDIR = Path('C:\\Projects\\Emotion_Loc\\Experiment_2')
-STIM_FOLDER = EXPDIR / Path('stimuli')
-PRIMING_FOLDER = STIM_FOLDER / Path('priming')
-LOC_FOLDER = STIM_FOLDER / Path('localization')
-RCO_FOLDER = EXPDIR / Path('rcx')
+proc_list = [["RX81", "RX8", "path/play_buffer_from_channel.rcx"],
+             ["RX82", "RX8", "path/play_buffer_from_channel.rcx"],
+             ["RP2", "RP2", "path/button_response.rcx"]]
 
-# 13 speakers, 24 in the middle, 6 to each side, there is no speaker 0
-_speakers = list(range(9, 25))
-_files = list(range(1, 31))
-rx81_path = str(RCO_FOLDER / Path("play_buffer_from_channel.rcx"))
-rp2_path = str(RCO_FOLDER / Path("button_response.rcx"))
-
-# _files = list(range(1, 31))  neutral
-# _files = list(range(1, 36)) negative
-# _files = list(range(1, 42)) positive
-
-setup.set_speaker_config("arc")
-setup.initialize_devices(ZBus=True, cam=True, RX8_file=rx81_path, RP2_file=rp2_path)
-
-# TODO: vortest für noise level
-# TODO: Reaktionszeit?
-# TODO: LEDs auch an meine LAutsprecher?
-# TODO: gleiche Noise im localisations Test und im Versuch
-# TODO: sound files von stereo auf mono
+# for real experiment, change camera_type to "flir"
+main.initialize_setup(setup="arc", proc_list=proc_list, zbus=True, connection="GB", camera_type="web")
+SPEAKERS = main.get_speaker_list(list(range(9, 25)))  # 13 speakers, 24 in the middle, 6 to each side
+FILES = list(range(1, 31))
 
 
-def priming(kind='positive'):  # 'negative', or 'neutral'
+def priming(kind='positive', n_files=7):  # 'negative', or 'neutral
+    """
+    a short description of what this function does ...
+    """
     if kind not in ('positive', 'negative', 'neutral'):
         raise ValueError('Unknown run type. Should be positive, negative, or neutral.')
     input(f'Show {kind} priming to participant!')
-    infolder = PRIMING_FOLDER / Path(kind)
     # randomly choose one of the 7 files to play
-    n = np.random.randint(1, 8)
-    file = infolder / Path(str(n) + '.wav')
+    file = DIR / "stimuli" / f"{np.random.randint(n_files)}.wav"
     if not file.is_file():
         raise ValueError(f'File {file} does not exist. Aborting...')
-    stim = slab.Sound.read(str(file))
-    stim = stim.channel(0)
-    stim.level = 80
-    setup.set_variable("priming", stim.data, "RX81")
-    setup.set_variable("playbuflen", stim.nsamples, "RX81")
-    for i, j in zip(range(9, 25, 3), range(6)):  # i = channel nr, j= rco-tag nr
-        setup.set_variable(variable="chan"+str(j), value=i, proc="RX81")
-        setup.trigger("zBusB")
-        setup.wait_to_finish_playing()
-    # for j in range(6):  # set all channels back to 25
-        setup.set_variable(variable="chan"+str(j), value=25, proc="RX81")
+    priming_stimulus = slab.Sound.read(str(file)).channel(0)
+    main.write(tag="priming", value=priming_stimulus.data, procs=["RX81", "RX82"])
+    main.write(tag="playbuflen", value=priming_stimulus.nsamples, procs=["RX81", "RX82"])
+    priming_speakers = SPEAKERS.iloc[::3, :]  # play the priming stimulus from every third speaker
+    priming_speakers.level -= 5*(len(priming_speakers)-1)  # reduce loudness by 5 dB for each additional speaker
+    for index, speaker in priming_speakers.iterrows():  # set the speakers
+        main.write(tag=f"chan{index}", value=speaker.channel, procs=speaker.analog_proc)
+    main.play_and_wait()
+    for index, speaker in priming_speakers.iterrows():  # "unset" the speakers again
+        main.write(tag=f"chan{index}", value=99, procs=speaker.analog_proc)
 
 
+"""
 def block(speaker_seq, file_seq, kind='positive', stimlevel=90, noiselevel=80):  # 'negative', or 'neutral'
 
     # when starting the block, send a 0 to each speaker
@@ -133,3 +114,4 @@ def run_experiment(subject, repeat_files=2, repeat_conditions=2):
 
         response = block(kind=condition, speaker_seq=speaker_seq, file_seq=file_seq)
         np.savetxt(out_folder/("response_"+condition+str(conditions.this_n)+".npy"), response)
+"""
