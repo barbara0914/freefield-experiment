@@ -31,8 +31,6 @@ setup.initialize_devices(ZBus=True, cam=True, RX8_file=rx81_path, RP2_file=rp2_p
 # TODO: vortest für noise level
 # TODO: Reaktionszeit?
 # TODO: LEDs auch an meine LAutsprecher?
-# TODO: gleiche Noise im localisations Test und im Versuch
-# TODO: sound files von stereo auf mono
 
 
 def priming(kind='positive'):  # 'negative', or 'neutral'
