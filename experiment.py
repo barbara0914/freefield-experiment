@@ -38,18 +38,24 @@ def priming(kind='positive', n_files=7):  # 'negative', or 'neutral
 
 
 def block(SPEAKERS, FILES, kind='positive', stimlevel=90, noiselevel=80):  # 'negative', or 'neutral'
-"""
-    # when starting the block, send a 0 to each speaker
+
+    if kind not in ('positive', 'negative', 'neutral', 'noise'):
+        raise ValueError('Unknown run type. Should be positive, negative, neutral, or noise.')
+    if kind != "noise":  # send noise from other speakers
+    file = DIR / "stimuli" / f"{np.random.randint(n_files)}.wav"
+    
+    
+    
+ """   
     for speaker in _speakers:
         setup.set_variable("stim", 0, "RX81")
         setup.set_variable("chan0", speaker, "RX81")
 
-    if kind not in ('positive', 'negative', 'neutral', 'noise'):
-        raise ValueError('Unknown run type. Should be positive, negative, neutral, or noise.')
+    
     response = []
     noise = slab.Sound.whitenoise(duration=1.0, samplerate=48828)  # background noise
     noise.level = noiselevel
-    if kind != "noise":  # send noise from other speakers
+    
         setup.set_variable("noise", noise.data, "RX81")
     while speaker_seq.n_remaining > 0:
         speaker = speaker_seq.__next__()
@@ -57,7 +63,7 @@ def block(SPEAKERS, FILES, kind='positive', stimlevel=90, noiselevel=80):  # 'ne
         print("trial number %s of %s" % (str(speaker_seq.this_n), speaker_seq.n_trials))
         stim = slab.Sound.read(LOC_FOLDER/kind/(str(file)+".wav"))  # read random wav
         stim.level = stimlevel
-        stim = stim.channel(0)  # not needed as soon as mono sound files are used
+     
         setup.set_variable("playbuflen", stim.nsamples, "RX81")
         setup.set_variable("stim", stim.data, "RX81")
         setup.set_variable("chan0", speaker, "RX81")
