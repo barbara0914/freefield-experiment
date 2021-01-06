@@ -61,13 +61,7 @@ def block(SPEAKERS, FILES, kind='positive', stimlevel=90, noiselevel=80):  # 'ne
     
     if kind != "noise":  # send noise from other speakers
             noise_speakers = Speakers.copy()
-            noise_speakers.remove(speaker)
-      
-     
- """  
-        
-            noise_speakers = _speakers.copy()
-            noise_speakers.remove(speaker)
+            noise_speakers.remove(speaker) 
             for speaker, chan in zip(noise_speakers[::3], range(1, 6)):
                 setup.set_variable("chan"+str(chan), speaker, "RX81")
         while not setup.get_variable("response", proc="RP2"):
@@ -85,8 +79,8 @@ def block(SPEAKERS, FILES, kind='positive', stimlevel=90, noiselevel=80):  # 'ne
             ele, azi = setup.get_headpose()
             response.append([y])
 
-    return response
-
+   
+"""
 
 def run_experiment(subject, repeat_files=2, repeat_conditions=2):
 
