@@ -23,8 +23,7 @@ def priming(kind='positive', n_files=7):  # 'negative', or 'neutral
     input(f'Show {kind} priming to participant!')
     # randomly choose one of the 7 files to play
     file = DIR / "stimuli" / f"{np.random.randint(n_files)}.wav"
-    if not file.is_file():
-        raise ValueError(f'File {file} does not exist. Aborting...')
+    
     priming_stimulus = slab.Sound.read(str(file)).channel(0)
     main.write(tag="priming", value=priming_stimulus.data, procs=["RX81", "RX82"])
     main.write(tag="playbuflen", value=priming_stimulus.nsamples, procs=["RX81", "RX82"])
@@ -41,33 +40,32 @@ def block(SPEAKERS, FILES, kind='positive', stimlevel=90, noiselevel=80):  # 'ne
 
     if kind not in ('positive', 'negative', 'neutral', 'noise'):
         raise ValueError('Unknown run type. Should be positive, negative, neutral, or noise.')
-    if kind != "noise":  # send noise from other speakers
+    input(f'Show {kind} block to the participants!')
     file = DIR / "stimuli" / f"{np.random.randint(n_files)}.wav"
-    
-    
-    
- """   
-    for speaker in _speakers:
-        setup.set_variable("stim", 0, "RX81")
-        setup.set_variable("chan0", speaker, "RX81")
-
-    
-    response = []
+    if not file.is_file():
+        raise ValueError(f'File {file} does not exist. Aborting...')
     noise = slab.Sound.whitenoise(duration=1.0, samplerate=48828)  # background noise
     noise.level = noiselevel
+    main.write(tag="playbuflen", value=noise.nsamples, procs=["RX81", "RX82"])
+    stim = slab.Sound.read(str(file)).channel(0)
+    main.write(tag="block", value=stim.data, procs=["RX81", "RX82"])
+    main.write(tag="playbuflen", value=stim.nsamples, procs=["RX81", "RX82"])
+    block_speakers = SPEAKERS.iloc[::1, :]
+    block_speakers.level -= 5*(len(block_speakers)-1)
     
-        setup.set_variable("noise", noise.data, "RX81")
-    while speaker_seq.n_remaining > 0:
-        speaker = speaker_seq.__next__()
-        file = file_seq.__next__()
-        print("trial number %s of %s" % (str(speaker_seq.this_n), speaker_seq.n_trials))
-        stim = slab.Sound.read(LOC_FOLDER/kind/(str(file)+".wav"))  # read random wav
-        stim.level = stimlevel
+    for index, speaker in block_speakers.iterrows():  # set the speakers
+        main.write(tag=f"chan{index}", value=speaker.channel, procs=speaker.analog_proc)
+    main.play_and_wait()
+    for index, speaker in block_speakers.iterrows():  # "unset" the speakers again
+        main.write(tag=f"chan{index}", value=99, procs=speaker.analog_proc)
+    
+    if kind != "noise":  # send noise from other speakers
+            noise_speakers = Speakers.copy()
+            noise_speakers.remove(speaker)
+      
      
-        setup.set_variable("playbuflen", stim.nsamples, "RX81")
-        setup.set_variable("stim", stim.data, "RX81")
-        setup.set_variable("chan0", speaker, "RX81")
-        if kind != "noise":  # send noise from 5 evenly spaced speakers
+ """  
+        
             noise_speakers = _speakers.copy()
             noise_speakers.remove(speaker)
             for speaker, chan in zip(noise_speakers[::3], range(1, 6)):
