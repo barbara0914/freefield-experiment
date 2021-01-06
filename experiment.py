@@ -16,9 +16,8 @@ FILES = list(range(1, 31))
 
 
 def priming(kind='positive', n_files=7):  # 'negative', or 'neutral
-    """
-    a short description of what this function does ...
-    """
+#showing emotional pictures to the participants, additionally playing the adapted priming stimulus  
+    
     if kind not in ('positive', 'negative', 'neutral'):
         raise ValueError('Unknown run type. Should be positive, negative, or neutral.')
     input(f'Show {kind} priming to participant!')
@@ -38,9 +37,8 @@ def priming(kind='positive', n_files=7):  # 'negative', or 'neutral
         main.write(tag=f"chan{index}", value=99, procs=speaker.analog_proc)
 
 
+def block(SPEAKERS, FILES, kind='positive', stimlevel=90, noiselevel=80):  # 'negative', or 'neutral'
 """
-def block(speaker_seq, file_seq, kind='positive', stimlevel=90, noiselevel=80):  # 'negative', or 'neutral'
-
     # when starting the block, send a 0 to each speaker
     for speaker in _speakers:
         setup.set_variable("stim", 0, "RX81")
