@@ -63,20 +63,20 @@ def block(SPEAKERS, FILES, kind='positive', stimlevel=90, noiselevel=80):  # 'ne
             noise_speakers = Speakers.copy()
             noise_speakers.remove(speaker) 
             for speaker, chan in zip(noise_speakers[::3], range(1, 6)):
-                setup.set_variable("chan"+str(chan), speaker, "RX81")
-        while not setup.get_variable("response", proc="RP2"):
+                main.set_variable("chan"+str(chan), speaker, "RX81")
+        while not main.get_variable("response", proc="RP2"):
             time.sleep(0.01)  # wait for trial start
-        ele, azi = camera.get_headpose(convert=True, average=True, n_images=5, resolution=0.5)
+        ele, azi = main.get_headpose(convert=True, average=True, n_images=5, resolution=0.5)
         # if np.abs(y) < 25:
         #    print("wrong pose!")
         #    setup.trigger(trig=1, proc="RX81")
         #    pass
         else:  # head position is correct --> start trial
-            setup.trigger()
-            setup.wait_to_finish_playing()
-            while not setup.get_variable("response", proc="RP2"):
+            main.trigger()
+            main.wait_to_finish_playing()
+            while not main.get_variable("response", proc="RP2"):
                 time.sleep(0.01)  # wait for response to stimulus
-            ele, azi = setup.get_headpose()
+            ele, azi = main.get_headpose()
             response.append([y])
 
    
