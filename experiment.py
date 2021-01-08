@@ -22,7 +22,7 @@ def priming(kind='positive', n_files=7):  # 'negative', or 'neutral
         raise ValueError('Unknown run type. Should be positive, negative, or neutral.')
     input(f'Show {kind} priming to participant!')
     # randomly choose one of the 7 files to play
-    file = DIR / "stimuli" / f"{np.random.randint(n_files)}.wav"
+    file = DIR / "stimuli" / f"{np.random.randint(n_files}.wav"
     
     priming_stimulus = slab.Sound.read(str(file)).channel(0)
     main.write(tag="priming", value=priming_stimulus.data, procs=["RX81", "RX82"])
@@ -41,7 +41,7 @@ def block(SPEAKERS, FILES, kind='positive', stimlevel=90, noiselevel=80):  # 'ne
     if kind not in ('positive', 'negative', 'neutral', 'noise'):
         raise ValueError('Unknown run type. Should be positive, negative, neutral, or noise.')
     input(f'Show {kind} block to the participants!')
-    file = DIR / "stimuli" / f"{np.random.randint(n_files)}.wav"
+    file = DIR / "stimuli" / f"{np.random.randint(n_files = len(FILES))}.wav"
     if not file.is_file():
         raise ValueError(f'File {file} does not exist. Aborting...')
     noise = slab.Sound.whitenoise(duration=1.0, samplerate=48828)  # background noise
@@ -60,7 +60,7 @@ def block(SPEAKERS, FILES, kind='positive', stimlevel=90, noiselevel=80):  # 'ne
         main.write(tag=f"chan{index}", value=99, procs=speaker.analog_proc)
     
     if kind != "noise":  # send noise from other speakers
-            noise_speakers = Speakers.copy()
+            noise_speakers = SPEAKERS.copy()
             noise_speakers.remove(speaker) 
             for speaker, chan in zip(noise_speakers[::3], range(1, 6)):
                 main.set_variable("chan"+str(chan), speaker, "RX81")
