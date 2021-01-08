@@ -9,8 +9,8 @@ proc_list = [["RX81", "RX8", "path/play_buffer_from_channel.rcx"],
              ["RP2", "RP2", "path/button_response.rcx"]]
 
 # Initialize
-setup.set_speaker_config("arc")
-camera.init(type="freefield")
+main.set_speaker_config("arc")
+main.init(type="freefield")
 
 # Define relevant variables for setup.localization_test()
 SPEAKERS = main.get_speaker_list(list(range(9, 25)))  # 13 speakers, 24 in the middle, 6 to each side
