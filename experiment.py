@@ -72,4 +72,8 @@ def other_speakers(speaker_seq):
     this_speaker = speaker_seq.this_trial
     other_speakers = [condition for condition in speaker_seq.conditions
                       if not all(condition.dropna() == this_speaker.dropna())]
+     main
     return other_speakers
+  
+    return other_speakers
+     main
